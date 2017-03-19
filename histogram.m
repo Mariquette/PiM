@@ -7,12 +7,12 @@ folder = uigetdir('Data/', 'Select Data Directory');
 
 px = 55;        %velikost pixelu [um]
 px_num = 256;   %pocet pixelu    
-filter = true;  %filtrovat?
+filter = false;  %filtrovat?
 ToT_max = 2^16; %maximalni hodnota pixelu v ToT rezimu
 
 %%  Loading ...
-%image_list = dir([folder, '/*.txt']);
-image_list = dir([folder, '/*image*']);
+image_list = dir([folder, '/*.txt']);
+%image_list = dir([folder, '/*image*']);
 value = length(image_list); 
 
 % load calibration matrices    
@@ -25,7 +25,7 @@ t = load([folder_cal, '/_Calib_t.txt']);
 images = zeros(px_num);
 images_fil = zeros(px_num);
 counts = 0;
-energies = zeros(ToT_max,1);
+energies = 0;
 
 h = waitbar(0,'Please wait...');
 for k=1:value
@@ -93,8 +93,14 @@ ylabel('y (mm)');
 colorbar;
 
 figure();
-[y, x] = hist(energies(1:counts),2^16);
-plot(x, y);
+hist(energies,max(energies));
+xlabel('E [kev]');
+ylabel('Counts [-]');
+xlim([0 100]);
+
+figure();
+[y,x] = hist(energies(1:counts),max(energies));
+plot(x,y);
 set(gca, 'YScale', 'log');
 xlabel('E [kev]');
 ylabel('Counts [-]');
