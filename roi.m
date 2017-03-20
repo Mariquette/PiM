@@ -4,6 +4,7 @@ function [x,y,image_roi] = roi(image)
     axis image; 
     colorbar; 
 
+    set(gcf,'Name','Oznac oblast zajmu (2 body)'); 
     [x_lim,y_lim] = ginput(2);
     
     y = round(y_lim(1)):round(y_lim(2));

@@ -33,12 +33,13 @@ axis image;
 colorbar;
 colormap jet;
 title([date,' ',name,' ',energy,' \newline',mirror,' ',measurement]);
-xlabel('Distance (mm)'); 
-ylabel('Distance (mm)'); 
+xlabel('x (mm)'); 
+ylabel('y (mm)'); 
 
 %% rezy
 figure(3);
 imagesc(image_roi);
+set(gcf,'Name','Oznac misto rezu (1 bod)'); 
 [x_p,y_p] = ginput(1); 
 x_p = round(x_p); 
 y_p = round(y_p);
@@ -71,18 +72,26 @@ FWHM_y_gauss = FitResults(4);
 figure(9); 
 plot(y,sect_ver); 
 line(xi,yi,'Color','red','LineWidth',2);
-xlabel('x (mm)'); 
+xlabel('y (mm)'); 
 ylabel('Counts (-)'); 
 title(['FWHM = ',num2str(round(FWHM_y*100)/100),' mm (data) / ',num2str(round(FWHM_y_gauss*100)/100),' mm (gaussfit)']);
 
 %% zapis vysledku do souboru
-vysl = fopen('../results.txt','a'); 
+vysl = fopen('results.txt','a'); 
 fprintf(vysl,'%s\t%s\t%g\t%g\t%g\t%g\n',path,mirror,FWHM_x,FWHM_x_gauss,FWHM_y,FWHM_y_gauss);
 fclose('all');
 
 %% ulozeni obrazku
 save_name = [path,mirror,'_',name];
 
-figure(2); print(gcf,'-dpng','-r600',[save_name,'.png']);
-figure(7); print(gcf,'-dpng','-r600',[save_name,'_h-sect.png']);
-figure(9); print(gcf,'-dpng','-r600',[save_name,'_v-sect.png']);
+figure(2); 
+print(gcf,'-dpng','-r600',[save_name,'.png']);
+saveas(gcf,[save_name,'.fig'],'fig');
+
+figure(7); 
+print(gcf,'-dpng','-r600',[save_name,'_h-sect.png']);
+saveas(gcf,[save_name,'_h-sect.fig'],'fig');
+
+figure(9); 
+print(gcf,'-dpng','-r600',[save_name,'_v-sect.png']);
+saveas(gcf,[save_name,'v_sect.fig'],'fig');
