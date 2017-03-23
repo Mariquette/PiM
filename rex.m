@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
 vertical = true; %vertikalni modul
-horizontal = false; %horizontalni modul
+horizontal = true; %horizontalni modul
 data_type = 'm'; % m (matrix) / c (columns)
 
 %% vyber souboru
@@ -36,6 +36,8 @@ end
 
 %% vykresleni
 figure(2); 
+subplot(3,2,1);
+
 x = linspace(px_x/1000/2,px_x/1000*length(xx)-px_x/1000/2,length(xx));
 y = linspace(px_y/1000/2,px_y/1000*length(yy)-px_y/1000/2,length(yy));
 imagesc(x,y,image_roi);
@@ -70,7 +72,8 @@ if (horizontal || vertical)
         [FitResults,LowestError,baseline,BestStart,xi,yi,residual] = peakfit([x' sect_hor']);
         FWHM_x_gauss = FitResults(4);
 
-        figure(7); 
+        figure(2); 
+        subplot(3,2,3);
         plot(x,sect_hor); 
         line(xi,yi,'Color','red','LineWidth',2);
         xlabel('x (mm)'); 
@@ -87,7 +90,8 @@ if (horizontal || vertical)
         [FitResults,LowestError,baseline,BestStart,xi,yi,residual] = peakfit([y' sect_ver]);
         FWHM_y_gauss = FitResults(4);
 
-        figure(9); 
+        figure(2); 
+        subplot(3,2,5);
         plot(y,sect_ver); 
         line(xi,yi,'Color','red','LineWidth',2);
         xlabel('y (mm)'); 
@@ -110,7 +114,8 @@ if (horizontal || vertical)
         [FitResults,LowestError,baseline,BestStart,xi,yi,residual] = peakfit([x' sum_hor']);
         sum_FWHM_x_gauss = FitResults(4);
 
-        figure(11); 
+        figure(2); 
+        subplot(3,2,4);
         plot(x,sum_hor); 
         line(xi,yi,'Color','red','LineWidth',2);
         xlabel('x (mm)'); 
@@ -127,7 +132,8 @@ if (horizontal || vertical)
         [FitResults,LowestError,baseline,BestStart,xi,yi,residual] = peakfit([y' sum_ver]);
         sum_FWHM_y_gauss = FitResults(4);
 
-        figure(13); 
+        figure(2); 
+        subplot(3,2,6);
         plot(y,sum_ver); 
         line(xi,yi,'Color','red','LineWidth',2);
         xlabel('y (mm)'); 
@@ -148,7 +154,7 @@ save_name = [path,mirror,'_',name];
 figure(2); 
 print(gcf,'-dpng','-r600',[save_name,'.png']);
 saveas(gcf,[save_name,'.fig'],'fig');
-
+%{
 if vertical
     figure(7); 
     print(gcf,'-dpng','-r600',[save_name,'_h-sect.png']);
@@ -168,3 +174,4 @@ if horizontal
     print(gcf,'-dpng','-r600',[save_name,'_v-sum.png']);
     saveas(gcf,[save_name,'_v-sect.fig'],'fig');
 end
+%}
