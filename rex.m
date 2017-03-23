@@ -1,35 +1,51 @@
-clear all; close all; clc;
+clear; close all; clc;
 
 vertical = true; %vertikalni modul
 horizontal = true; %horizontalni modul
 data_type = 'm'; % m (matrix) / c (columns)
+px_x = 55;
+px_y = 55;
+Title = 'Focus search REX z position 25 mm\newline Cu-K 1.45 mA, 15 kV\newline 1000x 0.5s';
 
 %% vyber souboru
-[file,path] = uigetfile('*.fits','Select file');
+path = uigetdir('Data/','Select folder');
+folderName = strsplit(path, '\');
 
-%% zjisteni informaci z FITS, nacteni dat
-info = fitsinfo([path,file]);
-info.PrimaryData.Keywords
+figTitle = [Title, '\newline', folderName{length(folderName)}];
+figTitle = strrep(figTitle,'_',' ');
+% %% zjisteni informaci z FITS, nacteni dat
+% info = fitsinfo([path,file]);
+% info.PrimaryData.Keywords
+% 
+% date = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'DATE'),2}; %datum
+% name = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'TITLE'),2}; %nazev
+% energy = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'XENER'),2}; %energie
+% mirror = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'MIRROR'),2}; %zrcadlo
+% px_x = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'XPIXSZ'),2}; %velikost pixelu [um]
+% px_y = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'YPIXSZ'),2}; %velikost pixelu [um]
+% pixas = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'PIXAS'),2}; %velikost pixelu [arcsec]
+% measurement = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'EXPTYP'),2}; %typ mereni
 
-date = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'DATE'),2}; %datum
-name = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'TITLE'),2}; %nazev
-energy = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'XENER'),2}; %energie
-mirror = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'MIRROR'),2}; %zrcadlo
-px_x = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'XPIXSZ'),2}; %velikost pixelu [um]
-px_y = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'YPIXSZ'),2}; %velikost pixelu [um]
-pixas = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'PIXAS'),2}; %velikost pixelu [arcsec]
-measurement = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'EXPTYP'),2}; %typ mereni
+% switch data_type
+%     case 'c'
+%         data = fitsread([path,file],'primary'); 
+%         image = zeros();
+%         for i=1:size(data,1)
+%             image(data(i,1),data(i,2)) = data(i,3);
+%         end
+%     case 'm'
+%         image = fitsread([path,file],'primary'); 
+% end
+imageList = dir([path '/*.txt']);
+noFiles = length(imageList);
 
-switch data_type
-    case 'c'
-        data = fitsread([path,file],'primary'); 
-        image = zeros();
-        for i=1:size(data,1)
-            image(data(i,1),data(i,2)) = data(i,3);
-        end
-    case 'm'
-        image = fitsread([path,file],'primary'); 
+image = load([path '/' imageList(1).name]);
+wb = waitbar(0, 'Wait please, loading images');
+for i=2:2:noFiles 
+  image = image + load([path '/' imageList(i).name]);
+  waitbar(i/noFiles, wb, sprintf('File %d/%d', i, noFiles));
 end
+close(wb);
 
 %% vyrez
 [xx,yy,image_roi] = roi(image);
@@ -38,13 +54,25 @@ end
 figure(2); 
 subplot(3,2,1);
 
+x = linspace(px_x/1000/2,px_x/1000*size(image, 1)-px_x/1000/2,size(image,1));
+y = linspace(px_y/1000/2,px_y/1000*size(image, 2)-px_y/1000/2,size(image,2));
+imagesc(x,y,image);
+axis image;
+colorbar;
+colormap jet;
+xlabel('x (mm)'); 
+ylabel('y (mm)'); 
+
+title(figTitle)
+
+subplot(3,2,2);
+
 x = linspace(px_x/1000/2,px_x/1000*length(xx)-px_x/1000/2,length(xx));
 y = linspace(px_y/1000/2,px_y/1000*length(yy)-px_y/1000/2,length(yy));
 imagesc(x,y,image_roi);
 axis image;
 colorbar;
 colormap jet;
-title([date,' ',name,' ',energy,' \newline',mirror,' ',measurement]);
 xlabel('x (mm)'); 
 ylabel('y (mm)'); 
 
@@ -78,7 +106,7 @@ if (horizontal || vertical)
         line(xi,yi,'Color','red','LineWidth',2);
         xlabel('x (mm)'); 
         ylabel('Counts (-)'); 
-        title(['FWHM = ',num2str(round(FWHM_x*100)/100),' mm (data) / ',num2str(round(FWHM_x_gauss*100)/100),' mm (gaussfit)']);
+        title(['Horizontal FWHM\newline',num2str(round(FWHM_x*100)/100),' mm (data) ',num2str(round(FWHM_x_gauss*100)/100),' mm (gaussfit)']);
     end
 
     if horizontal %vertikalni rez
@@ -96,7 +124,7 @@ if (horizontal || vertical)
         line(xi,yi,'Color','red','LineWidth',2);
         xlabel('y (mm)'); 
         ylabel('Counts (-)'); 
-        title(['FWHM = ',num2str(round(FWHM_y*100)/100),' mm (data) / ',num2str(round(FWHM_y_gauss*100)/100),' mm (gaussfit)']);
+        title(['Vertical FWHM\newline',num2str(round(FWHM_y*100)/100),' mm (data) ',num2str(round(FWHM_y_gauss*100)/100),' mm (gaussfit)']);
     end
     
     %% soucty
@@ -120,7 +148,7 @@ if (horizontal || vertical)
         line(xi,yi,'Color','red','LineWidth',2);
         xlabel('x (mm)'); 
         ylabel('Counts (-)'); 
-        title(['FWHM = ',num2str(round(sum_FWHM_x*100)/100),' mm (data) / ',num2str(round(sum_FWHM_x_gauss*100)/100),' mm (gaussfit)']);
+        title(['Sum Horizontal FWHM\newline',num2str(round(sum_FWHM_x*100)/100),' mm (data) ',num2str(round(sum_FWHM_x_gauss*100)/100),' mm (gaussfit)']);
     end
 
     if horizontal %soucet v horizontalnim smeru
@@ -138,40 +166,27 @@ if (horizontal || vertical)
         line(xi,yi,'Color','red','LineWidth',2);
         xlabel('y (mm)'); 
         ylabel('Counts (-)'); 
-        title(['FWHM = ',num2str(round(sum_FWHM_y*100)/100),' mm (data) / ',num2str(round(sum_FWHM_y_gauss*100)/100),' mm (gaussfit)']);
+        title(['Sum Vertical FWHM\newline',num2str(round(sum_FWHM_y*100)/100),' mm (data) ',num2str(round(sum_FWHM_y_gauss*100)/100),' mm (gaussfit)']);
     end
 
     %% zapis vysledku do souboru
     vysl = fopen('results.txt','a'); 
-    fprintf(vysl,'%s\t%s\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n',path,mirror, ...
+    fprintf(vysl,'%s\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n',folderName{length(folderName)}, ...
         FWHM_x,FWHM_x_gauss,FWHM_y,FWHM_y_gauss,sum_FWHM_x,sum_FWHM_x_gauss,sum_FWHM_y,sum_FWHM_y_gauss);
     fclose('all');
 end
 
 %% ulozeni obrazku
-save_name = [path,mirror,'_',name];
+
 
 figure(2); 
-print(gcf,'-dpng','-r600',[save_name,'.png']);
-saveas(gcf,[save_name,'.fig'],'fig');
-%{
-if vertical
-    figure(7); 
-    print(gcf,'-dpng','-r600',[save_name,'_h-sect.png']);
-    saveas(gcf,[save_name,'_h-sect.fig'],'fig');
 
-    figure(11); 
-    print(gcf,'-dpng','-r600',[save_name,'_h-sum.png']);
-    saveas(gcf,[save_name,'_h-sum.fig'],'fig');
+fontSize = 18;
+for i=1:1:6
+    subplot(3,2,i)
+    set(gca,'FontSize',fontSize,'FontWeight','bold')
 end
 
-if horizontal
-    figure(9); 
-    print(gcf,'-dpng','-r600',[save_name,'_v-sect.png']);
-    saveas(gcf,[save_name,'_v_sect.fig'],'fig');
-
-    figure(13); 
-    print(gcf,'-dpng','-r600',[save_name,'_v-sum.png']);
-    saveas(gcf,[save_name,'_v-sect.fig'],'fig');
-end
-%}
+tex_export(gca, gcf, folderName{length(folderName)}, fontSize);
+%print(gcf,'-dpng','-r600',[save_name,'.png']);
+%saveas(gcf,[save_name,'.fig'],'fig');

@@ -47,7 +47,7 @@ for k=1:value
         for g=1:length(xx)
            i = xx(g);
            j = yy(g);
-           if (getPixel(image,i,j) && ~getPixel(image,i,j-1) && ~getPixel(image,i,j+1) && ~getPixel(image,i-1,j-1) && ~getPixel(image,i-1,j) && ~getPixel(image,i-1,j+1) && ~getPixel(image,i+1,j-1) && ~getPixel(image,i+1,j) && ~getPixel(image,i+1,j+1))
+           if (getPixel(image,i,j) && ~getPixel(image,i,j-1) && ~getPixel(image,i,j+1) && ~getPixel(image,i+1,j) && ~getPixel(image,i-1,j) && ~getPixel(image,i-1,j-1) && ~getPixel(image,i-1,j+1) && ~getPixel(image,i+1,j-1) && ~getPixel(image,i+1,j+1))
                image_fil(i,j) = image(i, j);
            else
                image_fil(i,j) = 0;
@@ -88,7 +88,7 @@ a = colorbar;
 a.Label.String = 'Intensity (counts)';
 
 figure();
-imagesc(x,y,(images_fil));
+imagesc(x,y,log(images_fil));
 axis square; 
 title('Filtred image');
 xlabel('x (mm)'); 
