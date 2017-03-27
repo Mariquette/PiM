@@ -7,35 +7,12 @@ px_x = 55;
 px_y = 55;
 Title = 'Focus search REX z position 25 mm\newline Cu-K 1.45 mA, 15 kV\newline 1000x 0.5s';
 
-%% vyber souboru
+%% vyber slozky, nacteni souboru
 path = uigetdir('Data/','Select folder');
 folderName = strsplit(path, '\');
 
 figTitle = [Title, '\newline', folderName{length(folderName)}];
 figTitle = strrep(figTitle,'_',' ');
-% %% zjisteni informaci z FITS, nacteni dat
-% info = fitsinfo([path,file]);
-% info.PrimaryData.Keywords
-% 
-% date = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'DATE'),2}; %datum
-% name = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'TITLE'),2}; %nazev
-% energy = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'XENER'),2}; %energie
-% mirror = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'MIRROR'),2}; %zrcadlo
-% px_x = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'XPIXSZ'),2}; %velikost pixelu [um]
-% px_y = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'YPIXSZ'),2}; %velikost pixelu [um]
-% pixas = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'PIXAS'),2}; %velikost pixelu [arcsec]
-% measurement = info.PrimaryData.Keywords{strcmp(info.PrimaryData.Keywords(),'EXPTYP'),2}; %typ mereni
-
-% switch data_type
-%     case 'c'
-%         data = fitsread([path,file],'primary'); 
-%         image = zeros();
-%         for i=1:size(data,1)
-%             image(data(i,1),data(i,2)) = data(i,3);
-%         end
-%     case 'm'
-%         image = fitsread([path,file],'primary'); 
-% end
 imageList = dir([path '/*.txt']);
 noFiles = length(imageList);
 
@@ -177,8 +154,6 @@ if (horizontal || vertical)
 end
 
 %% ulozeni obrazku
-
-
 figure(2); 
 
 fontSize = 18;
