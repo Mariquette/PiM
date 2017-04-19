@@ -14,7 +14,7 @@ ToT_max = 2^16; %maximalni hodnota pixelu v ToT rezimu
 image_list = dir([folder, '/*.txt']);
 %image_list = dir([folder, '/*image*']);
 value = length(image_list); 
-%value = 500;
+value = 200;
 
 % load calibration matrices    
 a = load([folder_cal, '/_Calib_a.txt']);
@@ -73,40 +73,42 @@ end
 close(h);
 
 %% vykresleni grafu 
-
+close all
 x = linspace(px/1000/2,px/1000*px_num-px/1000/2,px_num);
 y = linspace(px/1000/2,px/1000*px_num-px/1000/2,px_num);
 
 figure();
-imagesc(x,y,(images));
+imagesc(x,y,log(images));
 axis square;
-title('Original image');
+%title('Original image');
 xlabel('x (mm)'); 
 ylabel('y (mm)'); 
-colormap(parula)
-a = colorbar;
-a.Label.String = 'Intensity (counts)';
+colormap(hot)
+%a = colorbar;
+%a.Label.String = 'Intensity (counts)';
 
 figure();
 imagesc(x,y,log(images_fil));
 axis square; 
-title('Filtred image');
+%title('Filtred image');
 xlabel('x (mm)'); 
 ylabel('y (mm)');
-colormap(parula)
-b = colorbar;
-b.Label.String = 'Intensity (counts)';
+colormap(hot)
+%b = colorbar;
+%b.Label.String = 'Intensity (counts)';
 
 figure();
-hist(energies,max(energies));
+hist(energies,2^11);%max(energies));
 xlabel('E [kev]');
 ylabel('Counts [-]');
-xlim([0 100]);
+xlim([0 14]);
 
 figure();
-[y,x] = hist(energies,max(energies));
+[y,x] = hist(energies,2^12);%max(energies));
 plot(x,y);
-set(gca, 'YScale', 'log');
+%set(gca, 'YScale', 'log');
 xlabel('E [kev]');
 ylabel('Counts [-]');
-xlim([0 100]);
+xlim([0 20]);
+
+x(find(y >= 0.5*max(y),1,'last')-find(y >= 0.5*max(y),1,'first')) 
